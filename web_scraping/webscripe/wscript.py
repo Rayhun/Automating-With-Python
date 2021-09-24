@@ -53,5 +53,25 @@ class NewsScraper:
         self.__soup = BeautifulSoup(self.__data, "html.parser")
     
     def parse_soup_to_simple_html(self):
-        news_list = self.__soup.find_all(['h1', 'h2', 'h3', 'h4'])
-        print(news_list)
+        news_list = self.__soup.find_all(['h1', 'h2', 'h3', 'h4', 'span'])
+        
+        htmltext = '''
+        <html>
+            <head>
+                <title> News link </title>
+            </head>
+            <body>
+                {NEWS_LINKS}
+            </body>
+        </html>
+        '''
+
+        news_links = '<ol>'
+        for tag in news_list:
+            if tag.parent.get('href'):
+                link = self.__url  + tag.parent.get('href')
+                title = tag.string
+                news_links += f"<li><a href='{link}' target='_blank'>{title}</a></li>"
+        news_links += '</ol>'
+        htmltext = htmltext.format(NEWS_LINKS=news_links)
+        self.write_webpage_as_html(filepath='html/news_link.html', data=htmltext.encode())
